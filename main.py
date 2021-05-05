@@ -1,11 +1,16 @@
 import discord
-import random
 from quote_generator import quote
+import random
+import sys
+import re
 
 client = discord.Client()
 
 def toss():
-    return random.choice(["Head", "Tail"])
+    return random.choice(['Head', 'Tail'])
+
+def greet(man):
+    return random.choice(['Hey @{} .', 'Good day, @{} !', 'Greetings @{} .']).format(man)
 
 @client.event
 async def on_ready():
@@ -17,7 +22,7 @@ async def on_message(message):
         return
 
     if message.content.startswith('$hello'):
-        await message.channel.send('Hello!')
+        await message.channel.send('Hello, I\'m robot!')
 
     if message.content.startswith('$quote'):
         await message.channel.send(quote.generate_quote())
@@ -25,7 +30,10 @@ async def on_message(message):
     if message.content.startswith('$toss'):
         await message.channel.send(toss())
 
-if __name__ == "__main__":
-    TOKEN = "ODM5Mzg0OTg3MjkxNzQ2MzA0.YJI4Lw.xtp0Csxr1GXDweWzLSc1q5IqPYk"
+    if message.content.startswith('$greet'):
+        await message.channel.send(greet(message.content.replace('$greet', '').strip()))
+
+if __name__ == '__main__':
+    TOKEN = 'ODM5Mzg0OTg3MjkxNzQ2MzA0.YJI4Lw.xtp0Csxr1GXDweWzLSc1q5IqPYk'
 
     client.run(TOKEN)
