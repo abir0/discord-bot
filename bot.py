@@ -48,7 +48,7 @@ async def info(ctx):
     embed = discord.Embed(title=f"{ctx.guild.name}",
                           timestamp=datetime.utcnow().strftime("%m-%d-%Y %H.%M.%S"),
                           color=discord.Color.blue())
-    embed.add_field(name="Server created at", value=f"{ctx.guild.created_at.strftime("%m-%d-%Y %H.%M.%S")}")
+    embed.add_field(name="Server created at", value=f"{ctx.guild.created_at}")
     embed.add_field(name="Server Owner", value=f"{ctx.guild.owner}")
     embed.add_field(name="Server Region", value=f"{ctx.guild.region}")
     embed.add_field(name="Server ID", value=f"{ctx.guild.id}")
