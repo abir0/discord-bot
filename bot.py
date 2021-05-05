@@ -52,8 +52,17 @@ async def info(ctx):
     embed.add_field(name="Server Owner", value=f"{ctx.guild.owner}")
     embed.add_field(name="Server Region", value=f"{ctx.guild.region}")
     embed.add_field(name="Server ID", value=f"{ctx.guild.id}")
-    embed.set_thumbnail(url="https://i.imgur.com/Bz4y6gC.png")
+    embed.set_thumbnail(url=f"{ctx.guild.icon}")
     await ctx.send(embed=embed)
+
+@bot.command()
+async def youtube(ctx, *, search):
+    query_string = parse.urlencode({'search_query': search})
+    html_content = request.urlopen('http://www.youtube.com/results?' + query_string)
+    search_results = re.findall( r"watch?v=(\S{11})", html_content.read().decode())
+    print(search_results)
+    # put the first result, then loop the response to show more results
+    await ctx.send('https://www.youtube.com/watch?v=' + search_results[0])
 
 ## Events
 @bot.event
