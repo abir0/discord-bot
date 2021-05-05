@@ -15,7 +15,7 @@ def greet(man):
 def generate_quote():
     global quotes_list
     q = random.choice(quotes_list)
-    return '\n"{}" \t ~ {}\n'.format(q[1], q[2])
+    return '\n"{}" \t ~ {}\n'.format(q[1], q[0])
 
 @client.event
 async def on_ready():
