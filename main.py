@@ -1,4 +1,5 @@
 import discord
+from quote_generator import quote
 
 TOKEN = "ODM5Mzg0OTg3MjkxNzQ2MzA0.YJI4Lw.xtp0Csxr1GXDweWzLSc1q5IqPYk"
 
@@ -15,5 +16,8 @@ async def on_message(message):
 
     if message.content.startswith('$hello'):
         await message.channel.send('Hello!')
+
+    if message.content.startswith('$quote'):
+        await message.channel.send(quote.generate_quote())
 
 client.run(TOKEN)
