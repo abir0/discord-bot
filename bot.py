@@ -59,4 +59,4 @@ async def on_ready():
     print('We have logged in as {0.user}'.format(bot))
 
 if __name__ == '__main__':
-    client.run(os.environ['token'])
+    bot.run(os.environ['token'])
