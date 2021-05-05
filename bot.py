@@ -3,8 +3,7 @@ from discord.ext import commands
 import os
 
 import random
-from datetime import datetime
-from urllib import parse, request
+from urllib.request import urlopen
 import re
 
 bot = commands.Bot(command_prefix='$', description="This is a Helper Bot")
@@ -58,11 +57,10 @@ async def info(ctx):
 @bot.command()
 async def youtube(ctx, *search):
     query_string = '+'.join(list(search))
-    html_content = request.urlopen('https://www.youtube.com/results?search_query=' + query_string)
-    search_results = re.findall(r'watch?v=(\S{11})', html_content.read().decode())
-    print(search_results)
-    # put the first result, then loop the response to show more results
-    await ctx.send('https://www.youtube.com/watch?v=' + search_results[0])
+    html_content = urlopen('https://www.youtube.com/results?search_query=' + query_string)
+    search_results = re.search(r'\"\/watch\?v=(\S{11})\"', html_content.read().decode())
+    # shows the first result
+    await ctx.send('https://www.youtube.com/watch?v=' + search_results[1])
 
 ## Events
 @bot.event
