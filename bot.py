@@ -56,10 +56,10 @@ async def info(ctx):
     await ctx.send(embed=embed)
 
 @bot.command()
-async def youtube(ctx, *, search):
-    query_string = parse.urlencode({'search_query': search})
-    html_content = request.urlopen('http://www.youtube.com/results?' + query_string)
-    search_results = re.findall( r"watch?v=(\S{11})", html_content.read().decode())
+async def youtube(ctx, *search):
+    query_string = '+'.join(list(search))
+    html_content = request.urlopen('https://www.youtube.com/results?search_query=' + query_string)
+    search_results = re.findall(r'watch?v=(\S{11})', html_content.read().decode())
     print(search_results)
     # put the first result, then loop the response to show more results
     await ctx.send('https://www.youtube.com/watch?v=' + search_results[0])
