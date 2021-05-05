@@ -1,9 +1,11 @@
 import discord
+import random
 from quote_generator import quote
 
-TOKEN = "ODM5Mzg0OTg3MjkxNzQ2MzA0.YJI4Lw.xtp0Csxr1GXDweWzLSc1q5IqPYk"
-
 client = discord.Client()
+
+def toss():
+    return random.choice(["Head", "Tail"])
 
 @client.event
 async def on_ready():
@@ -20,4 +22,10 @@ async def on_message(message):
     if message.content.startswith('$quote'):
         await message.channel.send(quote.generate_quote())
 
-client.run(TOKEN)
+    if message.content.startswith('$toss'):
+        await message.channel.send(toss())
+
+if __name__ == "__main__":
+    TOKEN = "ODM5Mzg0OTg3MjkxNzQ2MzA0.YJI4Lw.xtp0Csxr1GXDweWzLSc1q5IqPYk"
+
+    client.run(TOKEN)
