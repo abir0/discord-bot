@@ -1,16 +1,21 @@
 import discord
-from quote_generator import quote
 import random
-import sys
-import re
 
 client = discord.Client()
+
+quotes_list = [("Jett", "Wash dish."),
+               ("Sova", "I'm da hunter.")]
 
 def toss():
     return random.choice(['Head', 'Tail'])
 
 def greet(man):
     return random.choice(['Hey @{} .', 'Good day, @{} !', 'Greetings @{} .']).format(man)
+
+def generate_quote():
+    global quotes_list
+    q = random.choice(quotes_list)
+    return '\n"{}" \t ~ {}\n'.format(q[1], q[2])
 
 @client.event
 async def on_ready():
@@ -25,7 +30,7 @@ async def on_message(message):
         await message.channel.send('Hello, I\'m robot!')
 
     if message.content.startswith('$quote'):
-        await message.channel.send(quote.generate_quote())
+        await message.channel.send(generate_quote())
 
     if message.content.startswith('$toss'):
         await message.channel.send(toss())
