@@ -1,4 +1,5 @@
 import discord
+import os
 import random
 
 client = discord.Client()
@@ -39,6 +40,4 @@ async def on_message(message):
         await message.channel.send(greet(message.content.replace('$greet', '').strip()))
 
 if __name__ == '__main__':
-    TOKEN = 'ODM5Mzg0OTg3MjkxNzQ2MzA0.YJI4Lw.xtp0Csxr1GXDweWzLSc1q5IqPYk'
-
-    client.run(TOKEN)
+    client.run(os.environ['token'])
