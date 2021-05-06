@@ -4,7 +4,7 @@ import os
 import youtube_dl
 from datetime import datetime
 from urllib.request import urlopen
-import random
+from random import choice
 import time
 import json
 import re
@@ -15,6 +15,11 @@ client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix="$", intents=intents,
                      description="This is yet another discord bot.")
 
+greet_options = ["Hey", "Hi", "Greetings", "Hello"]
+
+coin = ["https://i.imgur.com/csSP4ce.jpg", "https://i.imgur.com/NSrQtWx.jpg"]
+
+games = ["Valorant", "Minecraft", "Paladins"]
 
 youtube_dl.utils.bug_reports_message = lambda: ""
 
@@ -43,8 +48,7 @@ async def ping(ctx):
 
 @bot.command(name="hello", help="Say hello to the bot")
 async def hello(ctx):
-    await ctx.send(random.choice(["Hey", "Hi", "Greetings", "Hello"])
-                            + " {0.display_name}!".format(ctx.author))
+    await ctx.send(choice(greet_options) + " {0.display_name}!".format(ctx.author))
 
 @bot.command(name="say", help="Make the bot say something")
 async def say(ctx, *words):
@@ -59,7 +63,7 @@ async def quote(ctx):
 @bot.command(name="toss", help="Toss a coin")
 async def toss(ctx):
     embed = discord.Embed(color=discord.Color.blue())
-    url = random.choice(["https://i.imgur.com/csSP4ce.jpg", "https://i.imgur.com/NSrQtWx.jpg"])
+    url = choice(coin)
     embed.set_image(url=url)
     await ctx.send(embed=embed)
 
@@ -131,7 +135,7 @@ async def play(ctx, url):
 
         async with ctx.typing():
             filename = await YTDLSource.from_url(url, loop=bot.loop)
-            voice_channel.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=filename))
+            voice_channel.play(discord.FFmpegPCMAudio(executable="ffmpeg", source=filename))
         await ctx.send('**Now playing:** {}'.format(filename))
     except:
         await ctx.send("The bot is not connected to a voice channel.")
@@ -164,6 +168,7 @@ async def stop(ctx):
 ## Events
 @bot.event
 async def on_ready():
+    await bot.change_presence(activity = discord.Game(choice(games)))
     print("We have logged in as {0.user}".format(bot))
 
 
