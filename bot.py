@@ -2,8 +2,9 @@ import discord
 from discord.ext import commands
 import os
 
-import random
+from datetime import datetime
 from urllib.request import urlopen
+import random
 import re
 
 bot = commands.Bot(command_prefix='$', description="This is a Helper Bot")
@@ -45,7 +46,7 @@ async def toss(ctx):
 @bot.command()
 async def info(ctx):
     embed = discord.Embed(title=f"{ctx.guild.name}",
-                          timestamp=datetime.utcnow(),
+                          timestamp=datetime.utcnow().strftime("%m-%d-%Y %H.%M.%S"),
                           color=discord.Color.blue())
     embed.add_field(name="Server created at", value=f"{ctx.guild.created_at}")
     embed.add_field(name="Server Owner", value=f"{ctx.guild.owner}")
@@ -66,6 +67,14 @@ async def youtube(ctx, *search):
 @bot.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(bot))
+
+@bot.listen()
+async def on_message(message):
+    if message.author == bot.user:
+        return
+
+    if 'hi' in message.content.lower():
+        await message.channel.send('hi')
 
 if __name__ == '__main__':
     bot.run(os.environ['token'])
