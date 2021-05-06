@@ -1,48 +1,67 @@
 import discord
 from discord.ext import commands
 import os
-
+import youtube_dl
 from datetime import datetime
 from urllib.request import urlopen
 import random
+import time
 import json
 import re
 
-bot = commands.Bot(command_prefix="$", description="This is a Helper Bot")
 
-greetings_list = ["Hey {}", "Good day, {}!", "Greetings {}"]
+bot = commands.Bot(command_prefix="$",intents=intents,
+                     description="This is yet another discord bot.")
 
-## Commands
-@bot.command()
+
+youtube_dl.utils.bug_reports_message = lambda: ""
+
+ffmpeg_options = {
+    'options': '-vn'
+}
+
+ytdl = youtube_dl.YoutubeDL({'format': 'bestaudio/best',
+                             'restrictfilenames': True,
+                             'noplaylist': True,
+                             'nocheckcertificate': True,
+                             'ignoreerrors': False,
+                             'logtostderr': False,
+                             'quiet': True,
+                             'no_warnings': True,
+                             'default_search': 'auto',
+                             'source_address': '0.0.0.0'})
+
+
+## General Commands
+@bot.command(name="ping", help="Check the bot latency")
 async def ping(ctx):
-    await ctx.send("pong")
+    message = await ctx.send("Pinging...")
+    time.sleep(0.5)
+    await message.edit(content="Latency = {}ms".format(round(bot.latency * 1000)))
 
-@bot.command()
+@bot.command(name="hello", help="Say hello to the bot")
 async def hello(ctx):
-    await ctx.send("Hello, I\'m robot!")
+    await ctx.send(random.choice(["Hey", "Hi", "Greetings", "Hello"])
+                            + " {0.display_name}!".format(ctx.author))
 
-@bot.command()
+@bot.command(name="say", help="Make the bot say something")
 async def say(ctx, *words):
     await ctx.send(" ".join(list(words)))
 
-@bot.command()
-async def greet(ctx, name):
-    await ctx.send(random.choice(greetings_list).format(name))
-
-@bot.command()
+@bot.command(name="quote", help="Get a random quote")
 async def quote(ctx):
     response = urlopen("https://zenquotes.io/api/random")
     json_data = json.loads(response.read())
-    await ctx.send("\"{}\" ~{}".format(json_data[0]["q"], json_data[0]["a"]))
+    await ctx.send("\"{}\"\t~ {}".format(json_data[0]["q"], json_data[0]["a"]))
 
-@bot.command()
+@bot.command(name="toss", help="Toss a coin")
 async def toss(ctx):
     embed = discord.Embed(color=discord.Color.blue())
     url = random.choice(["https://i.imgur.com/csSP4ce.jpg", "https://i.imgur.com/NSrQtWx.jpg"])
     embed.set_image(url=url)
     await ctx.send(embed=embed)
 
-@bot.command()
+@bot.command(name="info", help="View relevant info about the server")
 async def info(ctx):
     embed = discord.Embed(title=f"{ctx.guild.name}",
                           timestamp=datetime.utcnow(),
@@ -55,7 +74,8 @@ async def info(ctx):
     embed.set_thumbnail(url="{}".format(ctx.guild.icon_url))
     await ctx.send(embed=embed)
 
-@bot.command()
+
+@bot.command(name="youtube", help="Search youtube")
 async def youtube(ctx, *search):
     query_string = "+".join(list(search))
     html_content = urlopen("https://www.youtube.com/results?search_query=" + query_string)
@@ -63,10 +83,87 @@ async def youtube(ctx, *search):
     # shows the first result
     await ctx.send("https://www.youtube.com/watch?v=" + search_results[1])
 
+
+## Music Player
+class YTDLSource(discord.PCMVolumeTransformer):
+    def __init__(self, source, *, data, volume=0.5):
+        super().__init__(source, volume)
+        self.data = data
+        self.title = data.get("title")
+        self.url = ""
+
+    @classmethod
+    async def from_url(cls, url, *, loop=None, stream=False):
+        loop = loop or asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        if "entries" in data:
+            # take first item from a playlist
+            data = data["entries"][0]
+        filename = data["title"] if stream else ytdl.prepare_filename(data)
+        return filename
+
+
+@bot.command(name='join', help='Join into the voice channel')
+async def join(ctx):
+    if not ctx.message.author.voice:
+        await ctx.send("{} is not connected to a voice channel".format(ctx.message.author.name))
+        return
+    else:
+        channel = ctx.message.author.voice.channel
+    await channel.connect()
+
+@bot.command(name='leave', help='Leave the voice channel')
+async def leave(ctx):
+    voice_client = ctx.message.guild.voice_client
+    if voice_client.is_connected():
+        await voice_client.disconnect()
+    else:
+        await ctx.send("The bot is not connected to a voice channel.")
+
+
+@bot.command(name='play', help='Play a song')
+async def play(ctx, url):
+    try :
+        server = ctx.message.guild
+        voice_channel = server.voice_client
+
+        async with ctx.typing():
+            filename = await YTDLSource.from_url(url, loop=bot.loop)
+            voice_channel.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=filename))
+        await ctx.send('**Now playing:** {}'.format(filename))
+    except:
+        await ctx.send("The bot is not connected to a voice channel.")
+
+@bot.command(name='pause', help='Pause the song')
+async def pause(ctx):
+    voice_client = ctx.message.guild.voice_client
+    if voice_client.is_playing():
+        await voice_client.pause()
+    else:
+        await ctx.send("The bot is not playing anything at the moment.")
+
+@bot.command(name='resume', help='Resume the song')
+async def resume(ctx):
+    voice_client = ctx.message.guild.voice_client
+    if voice_client.is_paused():
+        await voice_client.resume()
+    else:
+        await ctx.send("The bot was not playing anything before this. Use play_song command")
+
+@bot.command(name='stop', help='Stop the song')
+async def stop(ctx):
+    voice_client = ctx.message.guild.voice_client
+    if voice_client.is_playing():
+        await voice_client.stop()
+    else:
+        await ctx.send("The bot is not playing anything at the moment.")
+
+
 ## Events
 @bot.event
 async def on_ready():
     print("We have logged in as {0.user}".format(bot))
+
 
 @bot.listen()
 async def on_message(message):
@@ -75,6 +172,7 @@ async def on_message(message):
 
     if "hi" in message.content.lower():
         await message.channel.send("hi")
+
 
 if __name__ == "__main__":
     bot.run(os.environ["token"])
