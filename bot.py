@@ -26,15 +26,16 @@ games = ["Valorant", "Minecraft", "Paladins"]
 youtube_dl.utils.bug_reports_message = lambda: ""
 
 ytdl_format_options = {'format': 'bestaudio/best',
-                             'restrictfilenames': True,
-                             'noplaylist': True,
-                             'nocheckcertificate': True,
-                             'ignoreerrors': False,
-                             'logtostderr': False,
-                             'quiet': True,
-                             'no_warnings': True,
-                             'default_search': 'auto',
-                             'source_address': '0.0.0.0'
+                                 'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
+                                 'restrictfilenames': True,
+                                 'noplaylist': True,
+                                 'nocheckcertificate': True,
+                                 'ignoreerrors': False,
+                                 'logtostderr': False,
+                                 'quiet': True,
+                                 'no_warnings': True,
+                                 'default_search': 'auto',
+                                 'source_address': '0.0.0.0'
 }
 
 ffmpeg_options = {
@@ -103,7 +104,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         super().__init__(source, volume)
         self.data = data
         self.title = data.get("title")
-        self.url = ""
+        self.url = data.get('url')
 
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
@@ -112,8 +113,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
         if "entries" in data:
             # take first item from a playlist
             data = data["entries"][0]
-        filename = data["title"] if stream else ytdl.prepare_filename(data)
-        return filename
+        filename = data["url"] if stream else ytdl.prepare_filename(data)
+        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
 @bot.command(name='join', help='Join into the voice channel')
@@ -142,9 +143,9 @@ async def play(ctx, *query):
         url = "https://www.youtube.com/watch?v=" + youtube_search(*query)
 
         async with ctx.typing():
-            filename = await YTDLSource.from_url(url, loop=bot.loop)
-            voice_channel.play(discord.FFmpegPCMAudio(source=filename))
-        await ctx.send('**Now playing:** {}'.format(filename))
+            player = await YTDLSource.from_url(url, loop=bot.loop)
+            voice_channel.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+        await ctx.send('Now playing: {}'.format(player.title))
     except:
         await ctx.send("The bot is not connected to a voice channel.")
 
@@ -162,7 +163,7 @@ async def resume(ctx):
     if voice_client.is_paused():
         await voice_client.resume()
     else:
-        await ctx.send("The bot was not playing anything before this. Use play_song command")
+        await ctx.send("The bot was not playing anything before this. Use play command")
 
 @bot.command(name='stop', help='Stop the song')
 async def stop(ctx):
