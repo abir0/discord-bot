@@ -10,7 +10,9 @@ import json
 import re
 
 
-bot = commands.Bot(command_prefix="$",intents=intents,
+intents = discord.Intents().all()
+client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix="$", intents=intents,
                      description="This is yet another discord bot.")
 
 
