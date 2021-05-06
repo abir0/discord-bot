@@ -46,13 +46,14 @@ async def toss(ctx):
 @bot.command()
 async def info(ctx):
     embed = discord.Embed(title=f"{ctx.guild.name}",
-                          timestamp=datetime.utcnow().strftime("%m-%d-%Y %H.%M.%S"),
+                          timestamp=datetime.utcnow(),
                           color=discord.Color.blue())
-    embed.add_field(name="Server created at", value=f"{ctx.guild.created_at}")
-    embed.add_field(name="Server Owner", value=f"{ctx.guild.owner}")
-    embed.add_field(name="Server Region", value=f"{ctx.guild.region}")
-    embed.add_field(name="Server ID", value=f"{ctx.guild.id}")
-    embed.set_thumbnail(url=f"{ctx.guild.icon}")
+    embed.add_field(name="Server created at", value="{}".format(ctx.guild.created_at.strftime("%m-%d-%Y %H:%M")))
+    embed.add_field(name="Server Owner", value="{}".format(ctx.guild.owner))
+    embed.add_field(name="Server Region", value="{}".format(ctx.guild.region))
+    embed.add_field(name="Total Members", value="{}".format(ctx.guild.member_count))
+    embed.add_field(name="Server ID", value="{}".format(ctx.guild.id))
+    embed.set_thumbnail(url="{}".format(ctx.guild.icon_url))
     await ctx.send(embed=embed)
 
 @bot.command()
