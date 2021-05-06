@@ -100,7 +100,7 @@ async def youtube(ctx, *query):
 
 ## Music Player
 class YTDLSource(discord.PCMVolumeTransformer):
-    def __init__(self, source, *, data, volume=0.5):
+    def __init__(self, source, *, data, volume=0.75):
         super().__init__(source, volume)
         self.data = data
         self.title = data.get("title")
@@ -114,14 +114,14 @@ class YTDLSource(discord.PCMVolumeTransformer):
             # take first item from a playlist
             data = data["entries"][0]
         filename = data["url"] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(source=filename, **ffmpeg_options), data=data)
+        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @bot.command(name='join', help='Join into the voice channel')
-    async def join(ctx):
+    @commands.command(name='join', help='Add bot to the voice channel')
+    async def join(self, ctx):
         if not ctx.message.author.voice:
             await ctx.send("{} is not connected to a voice channel".format(ctx.message.author.name))
             return
@@ -130,71 +130,49 @@ class Music(commands.Cog):
         await channel.connect()
 
     @commands.command(name='play', help='Play a song')
-    async def play(ctx, *query):
-        try :
+    async def play(self, ctx, *query):
+        if ctx.voice_client is not None:
             voice_channel = ctx.message.guild.voice_client
-            url = youtube_search(*query)
+            if voice_client.is_playing():
+                await voice_client.stop()
+            url = "https://www.youtube.com/watch?v=" + youtube_search(*query)
 
             async with ctx.typing():
                 player = await YTDLSource.from_url(url, loop=self.bot.loop)
                 voice_channel.play(player, after=lambda e: print('Player error: {}'.format(e)) if e else None)
-            await ctx.send('Now playing: {}'.format(filename))
-        except:
-            await ctx.send("The bot is not connected to a voice channel.")
+            await ctx.send('Now playing: {}'.format(player.title))
+        else:
+            await ctx.send("Not connected to a voice channel.")
 
-    @commands.command()
+    @commands.command(name='volume', help='Change the volume')
     async def volume(self, ctx, volume: int):
-        """Changes the player's volume"""
+        if ctx.voice_client is not None:
+            ctx.voice_client.source.volume = volume / 100
+            await ctx.send("Changed volume to {}%".format(volume))
+        else:
+            await ctx.send("Not connected to a voice channel.")
 
-        if ctx.voice_client is None:
-            return await ctx.send("Not connected to a voice channel.")
-
-        ctx.voice_client.source.volume = volume / 100
-        await ctx.send("Changed volume to {}%".format(volume))
-
-    @bot.command(name='pause', help='This command pauses the song')
-    async def pause(ctx):
+    @commands.command(name='pause', help='Pause the song')
+    async def pause(self, ctx):
         voice_client = ctx.message.guild.voice_client
         if voice_client.is_playing():
             await voice_client.pause()
         else:
             await ctx.send("The bot is not playing anything at the moment.")
 
-    @bot.command(name='resume', help='Resumes the song')
-    async def resume(ctx):
+    @commands.command(name='resume', help='Resumes the song')
+    async def resume(self, ctx):
         voice_client = ctx.message.guild.voice_client
         if voice_client.is_paused():
             await voice_client.resume()
+        elif voice_client.is_playing():
+            await ctx.send("The bot is already playing a song.")
         else:
-            await ctx.send("The bot was not playing anything before this. Use play_song command")
+            await ctx.send("The bot was not playing anything before this. Use play command.")
 
-    @bot.command(name='stop', help='Stops the song')
-    async def stop(ctx):
-        voice_client = ctx.message.guild.voice_client
-        if voice_client.is_playing():
-            await voice_client.stop()
-        else:
-            await ctx.send("The bot is not playing anything at the moment.")
-
-    @commands.command()
+    @commands.command(name='leave', help='Disconnect bot from the voice channel')
     async def leave(self, ctx):
-        """Stops and disconnects the bot from voice"""
-
         await ctx.voice_client.disconnect()
-
-    @play.before_invoke
-    @resume.before_invoke
-    @pause.before_invoke
-    @stop.before_invoke
-    async def ensure_voice(self, ctx):
-        if ctx.voice_client is None:
-            if ctx.author.voice:
-                await ctx.author.voice.channel.connect()
-            else:
-                await ctx.send("You are not connected to a voice channel.")
-                raise commands.CommandError("Author not connected to a voice channel.")
-        elif ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
 
 
 ## Events
@@ -208,9 +186,6 @@ async def on_ready():
 async def on_message(message):
     if message.author == bot.user:
         return
-
-    if "hi" in message.content.lower():
-        await message.channel.send("hi")
 
 
 if __name__ == "__main__":
