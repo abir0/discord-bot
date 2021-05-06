@@ -132,14 +132,14 @@ class Music(commands.Cog):
     @commands.command(name='play', help='Play a song')
     async def play(self, ctx, *query):
         if ctx.voice_client is not None:
-            voice_channel = ctx.message.guild.voice_client
+            voice_client = ctx.message.guild.voice_client
             if voice_client.is_playing():
                 await voice_client.stop()
             url = "https://www.youtube.com/watch?v=" + youtube_search(*query)
 
             async with ctx.typing():
                 player = await YTDLSource.from_url(url, loop=self.bot.loop)
-                voice_channel.play(player, after=lambda e: print('Player error: {}'.format(e)) if e else None)
+                voice_client.play(player, after=lambda e: print('Player error: {}'.format(e)) if e else None)
             await ctx.send('Now playing: {}'.format(player.title))
         else:
             await ctx.send("Not connected to a voice channel.")
