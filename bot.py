@@ -263,12 +263,23 @@ class Music(commands.Cog):
 async def on_ready():
     await bot.change_presence(activity = discord.Game(choice(games)))
     print("We have logged in as {0.user}".format(bot))
+    guild_data = dict()
     for guild in bot.guilds:
         for channel in guild.text_channels :
-            if str(channel) == "general" :
-                await channel.send('Robot Activated...')
-                await channel.send(file=discord.File('robot.png'))
-        print('Active in {}\nMember Count : {}'.format(guild.name,guild.member_count))
+            if str(guild.id) == "839625432043225148":
+                if str(channel) == "bot-stats":
+                    myChannel = channel
+
+                elif str(channel) == "bot-notification":
+                    await channel.send('Robot Activated...')
+                    await channel.send(file=discord.File('robot.png'))
+
+        guild_data[str(guild.name)] = (guild.member_count, guild.members)
+
+    for guild in guild_data:
+        await myChannel.send('Bot active in {}, Member Count : {}'.format(guild, guild_data[guild][0]))
+        for member in guild_data[guild][1]:
+            await myChannel.send('{}'.format(member))
 
 
 @bot.listen()
