@@ -1,20 +1,20 @@
-import discord
-from discord.ext import commands
 import os
 import asyncio
-import youtube_dl
 from datetime import datetime
 from urllib.request import urlopen
-from random import choice
+import requests
+from random import choice, randint
 import time
 import json
 import re
 
+import discord
+from discord.ext import commands
+import youtube_dl
 
-intents = discord.Intents().all()
-client = discord.Client(intents=intents)
-bot = commands.Bot(command_prefix="$", intents=intents,
-                     description="This is yet another discord bot.")
+
+bot = commands.Bot(command_prefix="$", intents=discord.Intents().all(),
+                        description="This is yet another discord bot.")
 
 
 greet_options = ["Hey", "Hi", "Greetings", "Hello"]
@@ -23,26 +23,27 @@ coin = ["https://i.imgur.com/csSP4ce.jpg", "https://i.imgur.com/NSrQtWx.jpg"]
 
 games = ["Valorant", "Minecraft", "Paladins"]
 
+# Silence useless bug reports messages
 youtube_dl.utils.bug_reports_message = lambda: ""
 
-ytdl_format_options = {'format': 'bestaudio/best',
-                                 'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
-                                 'restrictfilenames': True,
-                                 'noplaylist': True,
-                                 'nocheckcertificate': True,
-                                 'ignoreerrors': False,
-                                 'logtostderr': False,
-                                 'quiet': True,
-                                 'no_warnings': True,
-                                 'default_search': 'auto',
-                                 'source_address': '0.0.0.0'
+ytdl_options = {'format': 'bestaudio/best',
+                'outtmpl': '%(title)s-%(id)s.%(ext)s', # output file format
+                'restrictfilenames': True,
+                'noplaylist': True,
+                'nocheckcertificate': True,
+                'ignoreerrors': False,
+                'logtostderr': False,
+                'quiet': True,
+                'no_warnings': True,
+                'default_search': 'auto',
+                'source_address': '0.0.0.0'
 }
 
 ffmpeg_options = {
     'options': '-vn'
 }
 
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+ytdl = youtube_dl.YoutubeDL(ytdl_options)
 
 
 ## Functions
@@ -53,34 +54,30 @@ def youtube_search(*query):
 
 ## General Commands
 @bot.command(name="ping", help="Check the bot latency")
-async def ping(ctx):
+async def ping(ctx: commands.Context):
     message = await ctx.send("Pinging...")
     time.sleep(0.5)
     await message.edit(content="Latency = {}ms".format(round(bot.latency * 1000)))
 
-@bot.command(name="hello", help="Say hello to the bot")
-async def hello(ctx):
-    await ctx.send(choice(greet_options) + " {0.display_name}!".format(ctx.author))
-
 @bot.command(name="say", help="Make the bot say something")
-async def say(ctx, *words):
+async def say(ctx: commands.Context, *words: str):
     await ctx.send(" ".join(list(words)))
 
 @bot.command(name="quote", help="Get a random quote")
-async def quote(ctx):
+async def quote(ctx: commands.Context):
     response = urlopen("https://zenquotes.io/api/random")
     json_data = json.loads(response.read())
     await ctx.send("\"{}\"\t~ {}".format(json_data[0]["q"], json_data[0]["a"]))
 
 @bot.command(name="toss", help="Toss a coin")
-async def toss(ctx):
+async def toss(ctx: commands.Context):
     embed = discord.Embed(color=discord.Color.blue())
     url = choice(coin)
     embed.set_image(url=url)
     await ctx.send(embed=embed)
 
 @bot.command(name="info", help="View relevant info about the server")
-async def info(ctx):
+async def info(ctx: commands.Context):
     embed = discord.Embed(title="{}".format(ctx.guild.name),
                           timestamp=datetime.utcnow(),
                           color=discord.Color.blue())
@@ -93,9 +90,86 @@ async def info(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command(name="youtube", help="Search youtube")
-async def youtube(ctx, *query):
-    await ctx.send("https://www.youtube.com/watch?v=" + youtube_search(*query))
+class Greetings(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        self._last_member = None
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member: discord.Member):
+        channel = member.guild.system_channel
+        if channel is not None:
+            await channel.send('Welcome {0.mention}.'.format(member))
+
+    @commands.command(name='hello', help='Say hello to the bot')
+    async def hello(self, ctx: commands.Context, *, member: discord.Member = None):
+        member = member or ctx.author
+        if self._last_member is None or self._last_member.id != member.id:
+            await ctx.send(choice(greet_options) + ' {0.name}!'.format(member))
+        else:
+            await ctx.send(choice(greet_options) + ' {0.name}... Hmm this feels familiar.'.format(member))
+        self._last_member = member
+
+
+class Math(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    @commands.command(name="add", help="Add two numbers")
+    async def add(self, ctx: commands.Context, num1: str, num2: str):
+        await ctx.send("{}".format(float(num1) + float(num2)))
+
+    @commands.command(name="sub", help="Subtract two numbers")
+    async def sub(self, ctx: commands.Context, num1: str, num2: str):
+        await ctx.send("{}".format(float(num1) - float(num2)))
+
+    @commands.command(name="mul", help="Multiply two numbers")
+    async def mul(self, ctx: commands.Context, num1: str, num2: str):
+        await ctx.send("{}".format(float(num1) * float(num2)))
+
+    @commands.command(name="div", help="Divide two numbers")
+    async def div(self, ctx: commands.Context, num1: str, num2: str):
+        await ctx.send("{}".format(float(num1) / float(num2)))
+
+    @commands.command(name="mod", help="Remainder of two numbers")
+    async def mod(self, ctx: commands.Context, num1: str, num2: str):
+        await ctx.send("{}".format(float(num1) % float(num2)))
+
+
+class Search(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    @commands.command(name="youtube", help="Search youtube and get the result")
+    async def youtube(self, ctx: commands.Context, *query: str):
+        await ctx.send("https://www.youtube.com/watch?v=" + youtube_search(*query))
+
+    @commands.command(name="wiki", help="Get wikipedia search url")
+    async def wikipidea(self, ctx: commands.Context, *query: str):
+        await ctx.send("https://en.wikipedia.org/wiki/" + "_".join(list(query)))
+
+    @commands.command(name="google", help="Get google search url")
+    async def google(self, ctx: commands.Context, *query: str):
+        await ctx.send("https://www.google.com/search?q=" + "+".join(list(query)))
+
+
+class Meme(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    @commands.command(name="meme", help="Get a meme template")
+    async def meme_template(self, ctx: commands.Context):
+        response = requests.get("https://api.imgflip.com/get_memes")
+        json_data = json.loads(response.text)
+        memes_list = json_data["data"]["memes"]
+        index = randint(0, len(memes_list) - 1)
+        await ctx.send("{}".format(memes_list[index]["url"]))
+
+    @commands.command(name="gif", help="Get a random GIF (possibly related to meme)")
+    async def gif(self, ctx: commands.Context):
+        response = requests.get("https://api.giphy.com/v1/gifs/random?api_key={}&tag=&rating=r".format(os.environ["giphy_api_key"]))
+        json_data = json.loads(response.text)
+        await ctx.send("{}".format(json_data["data"]["url"]))
 
 
 ## Music Player
@@ -117,11 +191,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 class Music(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.command(name='join', help='Add bot to the voice channel')
-    async def join(self, ctx):
+    async def join(self, ctx: commands.Context):
         if not ctx.message.author.voice:
             await ctx.send("{} is not connected to a voice channel".format(ctx.message.author.name))
             return
@@ -130,9 +204,9 @@ class Music(commands.Cog):
         await channel.connect()
 
     @commands.command(name='play', help='Play a song')
-    async def play(self, ctx, *query):
-        if ctx.voice_client is not None:
-            voice_client = ctx.message.guild.voice_client
+    async def play(self, ctx: commands.Context, *query: str):
+        voice_client = ctx.message.guild.voice_client
+        if voice_client is not None:
             if voice_client.is_playing():
                 await voice_client.stop()
             url = "https://www.youtube.com/watch?v=" + youtube_search(*query)
@@ -145,15 +219,16 @@ class Music(commands.Cog):
             await ctx.send("Not connected to a voice channel.")
 
     @commands.command(name='volume', help='Change the volume')
-    async def volume(self, ctx, volume: int):
-        if ctx.voice_client is not None:
-            ctx.voice_client.source.volume = volume / 100
+    async def volume(self, ctx: commands.Context, volume: int):
+        voice_client = ctx.message.guild.voice_client
+        if voice_client is not None:
+            voice_client.source.volume = volume / 100
             await ctx.send("Changed volume to {}%".format(volume))
         else:
             await ctx.send("Not connected to a voice channel.")
 
     @commands.command(name='pause', help='Pause the song')
-    async def pause(self, ctx):
+    async def pause(self, ctx: commands.Context):
         voice_client = ctx.message.guild.voice_client
         if voice_client.is_playing():
             await voice_client.pause()
@@ -161,7 +236,7 @@ class Music(commands.Cog):
             await ctx.send("The bot is not playing anything at the moment.")
 
     @commands.command(name='resume', help='Resumes the song')
-    async def resume(self, ctx):
+    async def resume(self, ctx: commands.Context):
         voice_client = ctx.message.guild.voice_client
         if voice_client.is_paused():
             await voice_client.resume()
@@ -170,9 +245,18 @@ class Music(commands.Cog):
         else:
             await ctx.send("The bot was not playing anything before this. Use play command.")
 
+    @commands.command(name='stop', help='Stops the song')
+    async def stop(self, ctx: commands.Context):
+        voice_client = ctx.message.guild.voice_client
+        if voice_client.is_playing():
+            await voice_client.stop()
+        else:
+            await ctx.send("The bot is not playing anything at the moment.")
+
     @commands.command(name='leave', help='Disconnect bot from the voice channel')
-    async def leave(self, ctx):
-        await ctx.voice_client.disconnect()
+    async def leave(self, ctx: commands.Context):
+        voice_client = ctx.message.guild.voice_client
+        await voice_client.disconnect()
 
 
 ## Events
@@ -189,5 +273,9 @@ async def on_message(message):
 
 
 if __name__ == "__main__":
+    bot.add_cog(Greetings(bot))
+    bot.add_cog(Math(bot))
+    bot.add_cog(Search(bot))
+    bot.add_cog(Meme(bot))
     bot.add_cog(Music(bot))
     bot.run(os.environ["token"])
