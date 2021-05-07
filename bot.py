@@ -1,8 +1,6 @@
 import os
 import asyncio
 from datetime import datetime
-from urllib.request import urlopen
-import requests
 from random import choice, randint
 import time
 import json
@@ -11,6 +9,7 @@ import re
 import discord
 from discord.ext import commands
 import youtube_dl
+import requests
 
 
 bot = commands.Bot(command_prefix="$", intents=discord.Intents().all(),
@@ -49,8 +48,8 @@ ytdl = youtube_dl.YoutubeDL(ytdl_options)
 ## Functions
 def youtube_search(*query):
     query_string = "+".join(list(query))
-    html_content = urlopen("https://www.youtube.com/results?search_query=" + query_string)
-    return re.search(r"\"\/watch\?v=(\S{11})\"", html_content.read().decode())[1]
+    html_content = requests.get("https://www.youtube.com/results?search_query=" + query_string)
+    return re.search(r"\"\/watch\?v=(\S{11})\"", html_content.text)[1]
 
 ## General Commands
 @bot.command(name="ping", help="Check the bot latency")
@@ -65,8 +64,8 @@ async def say(ctx: commands.Context, *words: str):
 
 @bot.command(name="quote", help="Get a random quote")
 async def quote(ctx: commands.Context):
-    response = urlopen("https://zenquotes.io/api/random")
-    json_data = json.loads(response.read())
+    response = requests.get("https://zenquotes.io/api/random")
+    json_data = json.loads(response.text)
     await ctx.send("\"{}\"\t~ {}".format(json_data[0]["q"], json_data[0]["a"]))
 
 @bot.command(name="toss", help="Toss a coin")
