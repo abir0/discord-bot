@@ -2,9 +2,11 @@
 
 This is discord bot, robot, I made with discord.py, youtube-dl and ffmpeg. This bot is deployed and hosted by [Heroku](https://www.heroku.com).
 
-[Add robot into your discord server.](https://discord.com/api/oauth2/authorize?client_id=839384987291746304&permissions=3191861185&scope=bot).
+[Add robot into your discord server](https://discord.com/api/oauth2/authorize?client_id=839384987291746304&permissions=3191861185&scope=bot).
 
-<img align="center" src="https://i.imgur.com/E7GkwT2.jpg" alt="robot profile">
+<div style="text-align:center">
+  <img src="https://i.imgur.com/E7GkwT2.jpg" alt="robot profile">
+</div>
 
 ## Bot Features
 
