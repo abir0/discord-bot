@@ -1,5 +1,6 @@
 import os
 import asyncio
+from urllib.requests import urlopen
 from datetime import datetime
 from random import choice, randint
 import time
@@ -48,8 +49,8 @@ ytdl = youtube_dl.YoutubeDL(ytdl_options)
 ## Functions
 def youtube_search(*query):
     query_string = "+".join(list(query))
-    html_content = requests.get("https://www.youtube.com/results?search_query=" + query_string)
-    return re.search(r"\"\/watch\?v=(\S{11})\"", html_content.text)[1]
+    html_content = urlopen("https://www.youtube.com/results?search_query=" + query_string)
+    return re.search(r"\"\/watch\?v=(\S{11})\"", html_content.read().decode())[1]
 
 ## General Commands
 @bot.command(name="ping", help="Check the bot latency")
@@ -220,7 +221,7 @@ class Music(commands.Cog):
         await channel.connect()
 
     @commands.command(name='play', help='Play a song')
-    async def play(self, ctx: commands.Context, *query: str):
+    async def play(self, ctx: commands.Context, *query):
         voice_client = ctx.message.guild.voice_client
         if voice_client is not None:
             if voice_client.is_playing():
