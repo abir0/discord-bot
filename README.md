@@ -1,8 +1,10 @@
-# Discord Bot
+# Discord Bot: robot
 
-This is a discord bot I made with [discord.py](https://discordpy.readthedocs.io), youtube-dl and ffmpeg. This bot is hosted in [Heroku](https://www.heroku.com).
+This is discord bot, robot, I made with discord.py, youtube-dl and ffmpeg. This bot is deployed and hosted by [Heroku](https://www.heroku.com).
 
-You can add this bot into your discord server from [here](https://discord.com/api/oauth2/authorize?client_id=839384987291746304&permissions=3191861185&scope=bot).
+[Add robot into your discord server.](https://discord.com/api/oauth2/authorize?client_id=839384987291746304&permissions=3191861185&scope=bot).
+
+<img align="center" src="https://i.imgur.com/E7GkwT2.jpg" alt="robot profile">
 
 ## Bot Features
 
@@ -19,10 +21,12 @@ Currently,  it has these commands:
   - **mod** - Remainder of two numbers
   - **mul** - Multiply two numbers
   - **sub** - Subtract two numbers
+  - **rand** - Get a random number between two numbers
 
 ##### Meme:
   - **gif** - Get a random GIF or search one by query
-  - **meme** - Get a meme template
+  - **meme** - Get a random meme
+  - **template** - Get a random meme template
   
 ##### Music:
   - **join** - Add bot to the voice channel
