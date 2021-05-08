@@ -14,46 +14,11 @@ This is discord bot, robot, I made with discord.py, youtube-dl and ffmpeg. This 
 
 I'll be improving and adding commands and features to the bot quite frequently (maybe not as much).
 
-Currently,  it has these commands:
+Currently, robot has following commands:
 
-##### Greetings:
-  - **hello**   Say hello to the bot
-
-##### Math:
-  - **add** - Add two numbers
-  - **div** - Divide two numbers
-  - **mod** - Remainder of two numbers
-  - **mul** - Multiply two numbers
-  - **sub** - Subtract two numbers
-  - **rand** - Get a random number between two numbers
-
-##### Meme:
-  - **gif** - Get a random GIF or search one by query
-  - **meme** - Get a random meme
-  - **template** - Get a random meme template
-  
-##### Music:
-  - **join** - Add bot to the voice channel
-  - **leave** - Disconnect bot from the voice channel
-  - **pause** - Pause the song
-  - **play** - Play a song
-  - **resume** - Resumes the song
-  - **stop** - Stops the song
-  - **volume** - Change the volume
-
-##### Search:
-  - **mal** - Search an anime in My Anime List
-  - **google** - Get google search url
-  - **wiki** - Get wikipedia search url
-  - **youtube** - Search youtube and get the result
-
-##### Others:
-  - **help** - Get the list of all commands
-  - **info** - View relevant info about the server
-  - **ping** - Check the bot latency
-  - **quote** - Get a random quote
-  - **say** - Make the bot say something
-  - **toss** - Toss a coin
+<p align="center">
+  <img src="https://i.imgur.com/T09frjf.jpg" alt="robot profile">
+</p>
 
 ## Resources
 
