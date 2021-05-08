@@ -1,6 +1,6 @@
 import os
 import asyncio
-from urllib.requests import urlopen
+from urllib.request import urlopen
 from datetime import datetime
 from random import choice, randint
 import time
