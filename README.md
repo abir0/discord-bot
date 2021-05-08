@@ -12,16 +12,16 @@ Currently,  it has these commands:
 
 ##### Greetings:
   - **hello**   Say hello to the bot
-  
+
 ##### Math:
   - **add** - Add two numbers
   - **div** - Divide two numbers
   - **mod** - Remainder of two numbers
   - **mul** - Multiply two numbers
   - **sub** - Subtract two numbers
-  
+
 ##### Meme:
-  - **gif** - Get a random GIF (possibly related to meme)
+  - **gif** - Get a random GIF or search one by query
   - **meme** - Get a meme template
   
 ##### Music:
@@ -32,20 +32,21 @@ Currently,  it has these commands:
   - **resume** - Resumes the song
   - **stop** - Stops the song
   - **volume** - Change the volume
-  
+
 ##### Search:
+  - **mal** - Search an anime in My Anime List
   - **google** - Get google search url
   - **wiki** - Get wikipedia search url
   - **youtube** - Search youtube and get the result
-  
+
 ##### Others:
-  - **help** - Shows this message
+  - **help** - Get the list of all commands
   - **info** - View relevant info about the server
   - **ping** - Check the bot latency
   - **quote** - Get a random quote
   - **say** - Make the bot say something
   - **toss** - Toss a coin
-  
+
 ## Resources
 
 - [Discord.py Documentation](https://discordpy.readthedocs.io/)
@@ -54,4 +55,3 @@ Currently,  it has these commands:
 - [Real Python Tutorial](https://realpython.com/how-to-make-a-discord-bot-python)
 
 And many more resources from GittHub, YouTube, StackOverflow, etc.
-  
