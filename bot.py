@@ -135,6 +135,10 @@ class Math(commands.Cog):
     async def _mod(self, ctx: commands.Context, num1: float, num2: float):
         await ctx.send("{}".format(num1 % num2))
 
+    @commands.command(name="rand", help="Get a random number between two numbers")
+    async def _rand(self, ctx: commands.Context, num1: int, num2: int):
+        await ctx.send("{}".format(randint(num1, num2)))
+
 
 class Search(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -164,13 +168,19 @@ class Meme(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="meme", help="Get a meme template")
+    @commands.command(name="template", help="Get a meme template")
     async def meme_template(self, ctx: commands.Context):
         response = requests.get("https://api.imgflip.com/get_memes")
         json_data = json.loads(response.text)
         memes_list = json_data["data"]["memes"]
         index = randint(0, len(memes_list) - 1)
         await ctx.send("{}".format(memes_list[index]["url"]))
+
+    @commands.command(name="meme", help="Get a random meme")
+    async def meme(self, ctx: commands.Context, arg: str=None):
+        response = requests.get("https://meme-api.herokuapp.com/gimme")
+        json_data = json.loads(response.text)
+        await ctx.send("{}".format(json_data["url"]))
 
     @commands.command(name="gif", help="Get a random GIF or search one by query")
     async def gif(self, ctx: commands.Context, *query):
