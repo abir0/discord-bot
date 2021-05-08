@@ -115,24 +115,24 @@ class Math(commands.Cog):
         self.bot = bot
 
     @commands.command(name="add", help="Add two numbers")
-    async def add(self, ctx: commands.Context, num1: str, num2: str):
-        await ctx.send("{}".format(float(num1) + float(num2)))
+    async def _add(self, ctx: commands.Context, num1: float, num2: float):
+        await ctx.send("{}".format(num1 + num2))
 
     @commands.command(name="sub", help="Subtract two numbers")
-    async def sub(self, ctx: commands.Context, num1: str, num2: str):
-        await ctx.send("{}".format(float(num1) - float(num2)))
+    async def _sub(self, ctx: commands.Context, num1: float, num2: float):
+        await ctx.send("{}".format(num1 - num2))
 
     @commands.command(name="mul", help="Multiply two numbers")
-    async def mul(self, ctx: commands.Context, num1: str, num2: str):
-        await ctx.send("{}".format(float(num1) * float(num2)))
+    async def _mul(self, ctx: commands.Context, num1: float, num2: float):
+        await ctx.send("{}".format(num1 * num2))
 
     @commands.command(name="div", help="Divide two numbers")
-    async def div(self, ctx: commands.Context, num1: str, num2: str):
-        await ctx.send("{}".format(float(num1) / float(num2)))
+    async def _div(self, ctx: commands.Context, num1: float, num2: float):
+        await ctx.send("{}".format(num1 / num2))
 
     @commands.command(name="mod", help="Remainder of two numbers")
-    async def mod(self, ctx: commands.Context, num1: str, num2: str):
-        await ctx.send("{}".format(float(num1) % float(num2)))
+    async def _mod(self, ctx: commands.Context, num1: float, num2: float):
+        await ctx.send("{}".format(num1 % num2))
 
 
 class Search(commands.Cog):
@@ -142,6 +142,13 @@ class Search(commands.Cog):
     @commands.command(name="youtube", help="Search youtube and get the result")
     async def youtube(self, ctx: commands.Context, *query: str):
         await ctx.send("https://www.youtube.com/watch?v=" + youtube_search(*query))
+
+    @commands.command(name="mal", help="Search an anime in My Anime List")
+    async def mal(self, ctx: commands.Context, *query):
+        query_string = "%20".join(list(query))
+        html_content = requests.get("https://myanimelist.net/search/all?q={}&cat=anime".format(query_string))
+        url = re.search(r"href=\"(https:\/\/myanimelist\.net\/anime\/[0-9]+\/[_a-zA-Z0-9\-]+?)\"", html_content.text)[1]
+        await ctx.send(url)
 
     @commands.command(name="wiki", help="Get wikipedia search url")
     async def wikipidea(self, ctx: commands.Context, *query: str):
@@ -164,11 +171,21 @@ class Meme(commands.Cog):
         index = randint(0, len(memes_list) - 1)
         await ctx.send("{}".format(memes_list[index]["url"]))
 
-    @commands.command(name="gif", help="Get a random GIF (possibly related to meme)")
-    async def gif(self, ctx: commands.Context):
-        response = requests.get("https://api.giphy.com/v1/gifs/random?api_key={}&tag=&rating=r".format(os.environ["giphy_api_key"]))
-        json_data = json.loads(response.text)
-        await ctx.send("{}".format(json_data["data"]["url"]))
+    @commands.command(name="gif", help="Get a random GIF or search one by query")
+    async def gif(self, ctx: commands.Context, *query):
+        url_prefix = "https://api.giphy.com/v1/gifs"
+        if query == ():
+            url = "{}/random?api_key={}&tag=&rating=r".format(url_prefix, os.environ["giphy_api_key"])
+            response = requests.get(url)
+            json_data = json.loads(response.text)
+            await ctx.send("{}".format(json_data["data"]["url"]))
+        else:
+            url = "{}/search?api_key={}&q={}&limit=25&rating=g&lang=en".format(url_prefix,
+                                                                            os.environ["giphy_api_key"],
+                                                                            "%20".join(list(query)))
+            response = requests.get(url)
+            json_data = json.loads(response.text)
+            await ctx.send("{}".format(json_data["data"][randint(0, 24)]["url"]))
 
 
 ## Music Player
