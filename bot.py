@@ -13,8 +13,11 @@ import youtube_dl
 import requests
 
 
-bot = commands.Bot(command_prefix="$", intents=discord.Intents().all(),
-                        description="This is yet another discord bot.")
+bot = commands.Bot(
+    command_prefix="$",
+    intents=discord.Intents().all(),
+    description="This is yet another discord bot.",
+)
 
 
 greet_options = ["Hey", "Hi", "Greetings", "Hello"]
@@ -26,22 +29,21 @@ games = ["Valorant", "Minecraft", "Paladins"]
 # Silence useless bug reports messages
 youtube_dl.utils.bug_reports_message = lambda: ""
 
-ytdl_options = {'format': 'bestaudio/best',
-                'outtmpl': '%(title)s-%(id)s.%(ext)s', # output file format
-                'restrictfilenames': True,
-                'noplaylist': True,
-                'nocheckcertificate': True,
-                'ignoreerrors': False,
-                'logtostderr': False,
-                'quiet': True,
-                'no_warnings': True,
-                'default_search': 'auto',
-                'source_address': '0.0.0.0'
+ytdl_options = {
+    "format": "bestaudio/best",
+    "outtmpl": "%(title)s-%(id)s.%(ext)s",  # output file format
+    "restrictfilenames": True,
+    "noplaylist": True,
+    "nocheckcertificate": True,
+    "ignoreerrors": False,
+    "logtostderr": False,
+    "quiet": True,
+    "no_warnings": True,
+    "default_search": "auto",
+    "source_address": "0.0.0.0",
 }
 
-ffmpeg_options = {
-    'options': '-vn'
-}
+ffmpeg_options = {"options": "-vn"}
 
 ytdl = youtube_dl.YoutubeDL(ytdl_options)
 
@@ -49,8 +51,11 @@ ytdl = youtube_dl.YoutubeDL(ytdl_options)
 ## Functions
 def youtube_search(*query):
     query_string = "+".join(list(query))
-    html_content = urlopen("https://www.youtube.com/results?search_query=" + query_string)
+    html_content = urlopen(
+        "https://www.youtube.com/results?search_query=" + query_string
+    )
     return re.search(r"\"\/watch\?v=(\S{11})\"", html_content.read().decode())[1]
+
 
 ## General Commands
 @bot.command(name="ping", help="Check the bot latency")
@@ -59,15 +64,18 @@ async def ping(ctx: commands.Context):
     time.sleep(0.5)
     await message.edit(content="Latency = {}ms".format(round(bot.latency * 1000)))
 
+
 @bot.command(name="say", help="Make the bot say something")
 async def say(ctx: commands.Context, *words: str):
     await ctx.send(" ".join(list(words)))
+
 
 @bot.command(name="quote", help="Get a random quote")
 async def quote(ctx: commands.Context):
     response = requests.get("https://zenquotes.io/api/random")
     json_data = json.loads(response.text)
-    await ctx.send("\"{}\"\t~ {}".format(json_data[0]["q"], json_data[0]["a"]))
+    await ctx.send('"{}"\t~ {}'.format(json_data[0]["q"], json_data[0]["a"]))
+
 
 @bot.command(name="toss", help="Toss a coin")
 async def toss(ctx: commands.Context):
@@ -76,12 +84,18 @@ async def toss(ctx: commands.Context):
     embed.set_image(url=url)
     await ctx.send(embed=embed)
 
+
 @bot.command(name="info", help="View relevant info about the server")
 async def info(ctx: commands.Context):
-    embed = discord.Embed(title="{}".format(ctx.guild.name),
-                          timestamp=datetime.utcnow(),
-                          color=discord.Color.blue())
-    embed.add_field(name="Server created at", value="{}".format(ctx.guild.created_at.strftime("%m-%d-%Y %H:%M")))
+    embed = discord.Embed(
+        title="{}".format(ctx.guild.name),
+        timestamp=datetime.utcnow(),
+        color=discord.Color.blue(),
+    )
+    embed.add_field(
+        name="Server created at",
+        value="{}".format(ctx.guild.created_at.strftime("%m-%d-%Y %H:%M")),
+    )
     embed.add_field(name="Server Owner", value="{}".format(ctx.guild.owner))
     embed.add_field(name="Server Region", value="{}".format(ctx.guild.region))
     embed.add_field(name="Total Members", value="{}".format(ctx.guild.member_count))
@@ -99,15 +113,18 @@ class Greetings(commands.Cog):
     async def on_member_join(self, member: discord.Member):
         channel = member.guild.system_channel
         if channel is not None:
-            await channel.send('Welcome {0.mention}.'.format(member))
+            await channel.send("Welcome {0.mention}.".format(member))
 
-    @commands.command(name='hello', help='Say hello to the bot')
+    @commands.command(name="hello", help="Say hello to the bot")
     async def hello(self, ctx: commands.Context, *, member: discord.Member = None):
         member = member or ctx.author
         if self._last_member is None or self._last_member.id != member.id:
-            await ctx.send(choice(greet_options) + ' {0.name}!'.format(member))
+            await ctx.send(choice(greet_options) + " {0.name}!".format(member))
         else:
-            await ctx.send(choice(greet_options) + ' {0.name}... Hmm this feels familiar.'.format(member))
+            await ctx.send(
+                choice(greet_options)
+                + " {0.name}... Hmm this feels familiar.".format(member)
+            )
         self._last_member = member
 
 
@@ -151,8 +168,13 @@ class Search(commands.Cog):
     @commands.command(name="mal", help="Search an anime in My Anime List")
     async def mal(self, ctx: commands.Context, *query):
         query_string = "%20".join(list(query))
-        html_content = requests.get("https://myanimelist.net/search/all?q={}&cat=anime".format(query_string))
-        url = re.search(r"href=\"(https:\/\/myanimelist\.net\/anime\/[0-9]+\/[_a-zA-Z0-9\-]+?)\"", html_content.text)[1]
+        html_content = requests.get(
+            "https://myanimelist.net/search/all?q={}&cat=anime".format(query_string)
+        )
+        url = re.search(
+            r"href=\"(https:\/\/myanimelist\.net\/anime\/[0-9]+\/[_a-zA-Z0-9\-]+?)\"",
+            html_content.text,
+        )[1]
         await ctx.send(url)
 
     @commands.command(name="wiki", help="Get wikipedia search url")
@@ -177,7 +199,7 @@ class Meme(commands.Cog):
         await ctx.send("{}".format(memes_list[index]["url"]))
 
     @commands.command(name="meme", help="Get a random meme")
-    async def meme(self, ctx: commands.Context, arg: str=None):
+    async def meme(self, ctx: commands.Context, arg: str = None):
         response = requests.get("https://meme-api.herokuapp.com/gimme")
         json_data = json.loads(response.text)
         await ctx.send("{}".format(json_data["url"]))
@@ -186,14 +208,16 @@ class Meme(commands.Cog):
     async def gif(self, ctx: commands.Context, *query):
         url_prefix = "https://api.giphy.com/v1/gifs"
         if query == ():
-            url = "{}/random?api_key={}&tag=&rating=r".format(url_prefix, os.environ["giphy_api_key"])
+            url = "{}/random?api_key={}&tag=&rating=r".format(
+                url_prefix, os.environ["giphy_api_key"]
+            )
             response = requests.get(url)
             json_data = json.loads(response.text)
             await ctx.send("{}".format(json_data["data"]["url"]))
         else:
-            url = "{}/search?api_key={}&q={}&limit=25&rating=g&lang=en".format(url_prefix,
-                                                                            os.environ["giphy_api_key"],
-                                                                            "%20".join(list(query)))
+            url = "{}/search?api_key={}&q={}&limit=25&rating=g&lang=en".format(
+                url_prefix, os.environ["giphy_api_key"], "%20".join(list(query))
+            )
             response = requests.get(url)
             json_data = json.loads(response.text)
             await ctx.send("{}".format(json_data["data"][randint(0, 24)]["url"]))
@@ -210,27 +234,32 @@ class YTDLSource(discord.PCMVolumeTransformer):
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        data = await loop.run_in_executor(
+            None, lambda: ytdl.extract_info(url, download=not stream)
+        )
         if "entries" in data:
             # take first item from a playlist
             data = data["entries"][0]
         filename = data["url"] if stream else ytdl.prepare_filename(data)
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
+
 class Music(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name='join', help='Add bot to the voice channel')
+    @commands.command(name="join", help="Add bot to the voice channel")
     async def join(self, ctx: commands.Context):
         if not ctx.message.author.voice:
-            await ctx.send("{} is not connected to a voice channel".format(ctx.message.author.name))
+            await ctx.send(
+                "{} is not connected to a voice channel".format(ctx.message.author.name)
+            )
             return
         else:
             channel = ctx.message.author.voice.channel
         await channel.connect()
 
-    @commands.command(name='play', help='Play a song')
+    @commands.command(name="play", help="Play a song")
     async def play(self, ctx: commands.Context, *query):
         voice_client = ctx.message.guild.voice_client
         if voice_client is not None:
@@ -240,12 +269,15 @@ class Music(commands.Cog):
 
             async with ctx.typing():
                 player = await YTDLSource.from_url(url, loop=self.bot.loop)
-                voice_client.play(player, after=lambda e: print('Player error: {}'.format(e)) if e else None)
-            await ctx.send('Now playing: {}'.format(player.title))
+                voice_client.play(
+                    player,
+                    after=lambda e: print("Player error: {}".format(e)) if e else None,
+                )
+            await ctx.send("Now playing: {}".format(player.title))
         else:
             await ctx.send("Not connected to a voice channel.")
 
-    @commands.command(name='volume', help='Change the volume')
+    @commands.command(name="volume", help="Change the volume")
     async def volume(self, ctx: commands.Context, volume: int):
         voice_client = ctx.message.guild.voice_client
         if voice_client is not None:
@@ -254,7 +286,7 @@ class Music(commands.Cog):
         else:
             await ctx.send("Not connected to a voice channel.")
 
-    @commands.command(name='pause', help='Pause the song')
+    @commands.command(name="pause", help="Pause the song")
     async def pause(self, ctx: commands.Context):
         voice_client = ctx.message.guild.voice_client
         if voice_client.is_playing():
@@ -262,7 +294,7 @@ class Music(commands.Cog):
         else:
             await ctx.send("The bot is not playing anything at the moment.")
 
-    @commands.command(name='resume', help='Resumes the song')
+    @commands.command(name="resume", help="Resumes the song")
     async def resume(self, ctx: commands.Context):
         voice_client = ctx.message.guild.voice_client
         if voice_client.is_paused():
@@ -270,9 +302,11 @@ class Music(commands.Cog):
         elif voice_client.is_playing():
             await ctx.send("The bot is already playing a song.")
         else:
-            await ctx.send("The bot was not playing anything before this. Use play command.")
+            await ctx.send(
+                "The bot was not playing anything before this. Use play command."
+            )
 
-    @commands.command(name='stop', help='Stops the song')
+    @commands.command(name="stop", help="Stops the song")
     async def stop(self, ctx: commands.Context):
         voice_client = ctx.message.guild.voice_client
         if voice_client.is_playing():
@@ -280,7 +314,7 @@ class Music(commands.Cog):
         else:
             await ctx.send("The bot is not playing anything at the moment.")
 
-    @commands.command(name='leave', help='Disconnect bot from the voice channel')
+    @commands.command(name="leave", help="Disconnect bot from the voice channel")
     async def leave(self, ctx: commands.Context):
         voice_client = ctx.message.guild.voice_client
         await voice_client.disconnect()
@@ -289,25 +323,30 @@ class Music(commands.Cog):
 ## Events
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity = discord.Game(choice(games)))
-    print("We have logged in as {0.user}".format(bot))
+    await bot.change_presence(activity=discord.Game(choice(games)))
+    print("logged in as {0.user}".format(bot))
+
+    """
     guild_data = dict()
     for guild in bot.guilds:
-        for channel in guild.text_channels :
+        for channel in guild.text_channels:
             if str(guild.id) == "839625432043225148":
                 if str(channel) == "bot-stats":
                     myChannel = channel
 
                 elif str(channel) == "bot-notification":
-                    await channel.send('Robot Activated...')
-                    await channel.send(file=discord.File('robot.png'))
+                    await channel.send("Robot Activated...")
+                    await channel.send(file=discord.File("robot.png"))
 
         guild_data[str(guild.name)] = (guild.member_count, guild.members)
 
     for guild in guild_data:
-        await myChannel.send('Bot active in {}, Member Count : {}'.format(guild, guild_data[guild][0]))
+        await myChannel.send(
+            "Bot active in {}, Member Count : {}".format(guild, guild_data[guild][0])
+        )
         for member in guild_data[guild][1]:
-            await myChannel.send('{}'.format(member))
+            await myChannel.send("{}".format(member))
+    """
 
 
 @bot.listen()
