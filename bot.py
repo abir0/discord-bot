@@ -115,7 +115,7 @@ class Greetings(commands.Cog):
         if channel is not None:
             await channel.send("Welcome {0.mention}.".format(member))
 
-    @commands.command(name="hello", help="Say hello to the bot")
+    @commands.command(name="hello", aliases=["hi", "hey"], help="Say hello to the bot")
     async def hello(self, ctx: commands.Context, *, member: discord.Member = None):
         member = member or ctx.author
         if self._last_member is None or self._last_member.id != member.id:
@@ -161,7 +161,9 @@ class Search(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="youtube", help="Search youtube and get the result")
+    @commands.command(
+        name="youtube", aliases=["yt"], help="Search youtube and get the result"
+    )
     async def youtube(self, ctx: commands.Context, *query: str):
         await ctx.send("https://www.youtube.com/watch?v=" + youtube_search(*query))
 
@@ -181,7 +183,7 @@ class Search(commands.Cog):
     async def wikipidea(self, ctx: commands.Context, *query: str):
         await ctx.send("https://en.wikipedia.org/wiki/" + "_".join(list(query)))
 
-    @commands.command(name="google", help="Get google search url")
+    @commands.command(name="google", aliases=["g"], help="Get google search url")
     async def google(self, ctx: commands.Context, *query: str):
         await ctx.send("https://www.google.com/search?q=" + "+".join(list(query)))
 
@@ -259,7 +261,7 @@ class Music(commands.Cog):
             channel = ctx.message.author.voice.channel
         await channel.connect()
 
-    @commands.command(name="play", help="Play a song")
+    @commands.command(name="play", aliases=["p"], help="Play a song")
     async def play(self, ctx: commands.Context, *query):
         voice_client = ctx.message.guild.voice_client
         if voice_client is not None:
