@@ -12,10 +12,10 @@ class Weave:
               "b": "#3581B8",
     }
 
-    def __init__(self, formula, color, dim):
+    def __init__(self, formula, dim, color):
         self.formula = str(formula)
-        self.color = str(color)
         self.dim = int(dim)
+        self.color = str(color)
         self.size = 50
 
         self.weave_plan = list()
@@ -86,8 +86,4 @@ class Weave:
                 img = ImageDraw.Draw(self.image)
                 img.rectangle(shape, fill=self.Colors[col], outline="#EBE9E9")
 
-        filename = "files/{}_{}_{}.png".format(self.formula, self.color, self.dim)
-        with open(filename, "w") as file:
-            self.image.save(file)
-
-        return filename
+        return self.image

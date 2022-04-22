@@ -332,15 +332,15 @@ class WeavePlan(commands.Cog):
         self.bot = bot
 
     @commands.command(name="weave", help="Show weave plan from formula and color")
-    async def weave(self, ctx: commands.Context, formula: str="11", color: str="", dim: int=10):
-        weave = Weave(formula, color, dim)
-        # weave.show_weave_plan()
+    async def weave(self, ctx: commands.Context, formula: str="11", dim: int=10, color: str=""):
+        weave = Weave(formula, dim, color)
         weave.create_color_weave()
-        filename = weave.create_figure()
+        image = weave.create_figure()
+        filename = "files/{}_{}_{}.png".format(formula, color, dim)
         with open(filename, "rb") as fh:
-            f = discord.File(fh, filename=filename)
+            file = discord.File(fh, filename=filename)
         os.remove(filename)
-        await ctx.send(file=f)
+        await ctx.send(file=file)
 
 
 ## Events
