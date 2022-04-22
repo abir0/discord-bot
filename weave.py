@@ -75,7 +75,7 @@ class Weave:
         #         print(self.color_weave[i][j], end =" ")
         #     print()
 
-    def create_image(self):
+    def create_figure(self):
         w, h = self.dim*self.size+50, self.dim*self.size+50
         self.image = Image.new("RGB", (w, h))
 
