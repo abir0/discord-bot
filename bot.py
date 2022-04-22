@@ -332,7 +332,7 @@ class WeavePlan(commands.Cog):
         self.bot = bot
 
     @commands.command(name="weave", help="Show weave plan from formula and color")
-    async def weave(ctx: commands.Context, formula: str="11", color: str="", dim: int=10):
+    async def weave(self, ctx: commands.Context, formula: str="11", color: str="", dim: int=10):
         weave = Weave(formula, color, dim)
         # weave.show_weave_plan()
         weave.create_color_weave()
