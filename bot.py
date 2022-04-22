@@ -337,6 +337,8 @@ class WeavePlan(commands.Cog):
         weave.create_color_weave()
         image = weave.create_figure()
         filename = "files/{}_{}_{}.png".format(formula, color, dim)
+        with open(filename, "w") as fh:
+            image.save(fh)
         with open(filename, "rb") as fh:
             file = discord.File(fh, filename=filename)
         os.remove(filename)
