@@ -1,16 +1,21 @@
 import os
 import asyncio
+import time
+import re
+import json
+import math
 from urllib.request import urlopen
 from datetime import datetime
 from random import choice, randint
-import time
-import json
-import re
+from itertools import cycle
 
 import discord
 from discord.ext import commands
-import youtube_dl
 import requests
+import youtube_dl
+from PIL import Image, ImageDraw
+
+from weave import Weave
 
 
 bot = commands.Bot(
@@ -320,6 +325,22 @@ class Music(commands.Cog):
     async def leave(self, ctx: commands.Context):
         voice_client = ctx.message.guild.voice_client
         await voice_client.disconnect()
+
+
+class WeavePlan(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+
+    @commands.command(name="weave", help="Show weave plan from formula and color")
+    async def weave(ctx: commands.Context, formula: str="11", color: str="", dim: int=10):
+        weave = Weave(formula, color, dim)
+        # weave.show_weave_plan()
+        weave.create_color_weave()
+        filename = weave.create_figure()
+        with open(filename, "rb") as fh:
+            f = discord.File(fh, filename=filename)
+        os.remove(filename)
+        await ctx.send(file=f)
 
 
 ## Events
