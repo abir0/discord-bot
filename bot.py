@@ -384,5 +384,5 @@ if __name__ == "__main__":
     bot.add_cog(Search(bot))
     bot.add_cog(Meme(bot))
     bot.add_cog(Music(bot))
-    bot.add_cog(Weave(bot))
+    bot.add_cog(WeavePlan(bot))
     bot.run(os.environ["token"])
