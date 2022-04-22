@@ -9,13 +9,18 @@ class Weave:
               "1": "#ffffff",
               "r": "#DA344D",
               "g": "#169873",
-              "b": "#3581B8",
+              "b": "#0A369D",
+              "y": "#F7EE7F",
+              "o": "#F26419",
+              "v": "#4F345A",
+              "p": "#F15BB5",
+              "i": "#284B63",
     }
 
     def __init__(self, formula, dim, color):
         self.formula = str(formula)
         self.dim = int(dim)
-        self.color = str(color)
+        self.color = str(color).lower()
         self.size = 50
 
         self.weave_plan = list()
